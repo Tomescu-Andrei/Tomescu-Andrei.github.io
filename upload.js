@@ -6,7 +6,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const localStorageKey = 'blogPosts';
     const galleryStorageKey = 'approvedPosts';
 
-    // Load saved posts from localStorage
+    // Funcție pentru redimensionarea imaginii
+    function resizeImage(file, maxWidth, maxHeight, callback) {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth || height > maxHeight) {
+                    if (width > height) {
+                        height *= maxWidth / width;
+                        width = maxWidth;
+                    } else {
+                        width *= maxHeight / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // Redimensionare și compresie
+                callback(resizedDataUrl);
+            };
+
+            img.src = event.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    // Încarcă postările din localStorage
     function loadPosts() {
         postsContainer.innerHTML = '';
         galleryContainer.innerHTML = '';
@@ -22,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Display a single post
+    // Afișează o postare
     function displayPost(name, email, image, isApproved) {
         const container = isApproved ? galleryContainer : postsContainer;
 
@@ -49,41 +86,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             approveButton.addEventListener('click', () => {
                 approvePost(name, email, image);
-                notifyChange();
                 postElement.remove();
             });
 
             deleteButton.addEventListener('click', () => {
                 rejectPost(name, email, image);
-                notifyChange();
                 postElement.remove();
             });
         }
     }
 
-    // Save a single post to localStorage
+    // Salvează o postare în localStorage
     function savePostToLocalStorage(name, email, image) {
         const savedPosts = JSON.parse(localStorage.getItem(localStorageKey)) || [];
         savedPosts.push({ name, email, image });
         localStorage.setItem(localStorageKey, JSON.stringify(savedPosts));
-        notifyChange();
     }
 
-    // Approve post
+    // Aproba o postare
     function approvePost(name, email, image) {
         const approvedPosts = JSON.parse(localStorage.getItem(galleryStorageKey)) || [];
         approvedPosts.push({ name, email, image });
         localStorage.setItem(galleryStorageKey, JSON.stringify(approvedPosts));
 
         removePostFromLocalStorage(name, email, image, localStorageKey);
+        displayPost(name, email, image, true);
     }
 
-    // Reject post
+    // Respinge o postare
     function rejectPost(name, email, image) {
         removePostFromLocalStorage(name, email, image, localStorageKey);
     }
 
-    // Remove a post from localStorage
+    // Șterge o postare din localStorage
     function removePostFromLocalStorage(name, email, image, storageKey) {
         const savedPosts = JSON.parse(localStorage.getItem(storageKey)) || [];
         const updatedPosts = savedPosts.filter(
@@ -92,13 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(storageKey, JSON.stringify(updatedPosts));
     }
 
-    // Notify other tabs about changes
-    function notifyChange() {
-        const timestamp = Date.now(); // Utilizează un timestamp unic
-        localStorage.setItem('blogSync', timestamp.toString());
-    }
-
-    // Handle post submission
+    // Gestionarea trimiterii formularului
     postImageButton.addEventListener('click', () => {
         const name = document.getElementById('posterName').value.trim();
         const email = document.getElementById('posterEmail').value.trim();
@@ -120,31 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const file = imageInput.files[0];
-        const reader = new FileReader();
 
-        reader.onload = () => {
-            const image = reader.result;
-            displayPost(name, email, image, false);
-            savePostToLocalStorage(name, email, image);
+        // Redimensionează imaginea înainte de a o salva
+        resizeImage(file, 800, 800, (resizedImage) => {
+            displayPost(name, email, resizedImage, false);
+            savePostToLocalStorage(name, email, resizedImage);
             postForm.reset();
-        };
-
-        reader.readAsDataURL(file);
+        });
     });
 
-    // Validate email format
+    // Validează formatul email-ului
     function validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     }
 
-    // Listen for storage events
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'blogSync') {
-            loadPosts(); // Reîncarcă postările când există modificări
-        }
-    });
-
-    // Load posts on page load
+    // Încarcă postările la inițializare
     loadPosts();
 });
