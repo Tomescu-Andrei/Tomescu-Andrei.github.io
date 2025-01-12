@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proiect Final DAW - About</title>
+    <title>Proiect Final DAW - Blog Poze Mașini</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -11,7 +11,7 @@
 <body>
     <!-- Header -->
     <header class="bg-primary text-white text-center py-4">
-        <h1>Proiect Final DAW</h1>
+        <h1>Blog Poze Mașini</h1>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">Meniu</a>
@@ -21,9 +21,9 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
                         <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-                        <li class="nav-item"><a class="nav-link active" href="about.html">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
                         <li class="nav-item"><a class="nav-link" href="gallery.html">Gallery</a></li>
-                        <li class="nav-item"><a class="nav-link" href="upload.html">Upload</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="upload.html">Upload</a></li>
                         <!-- <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li> -->
                     </ul>
                 </div>
@@ -34,31 +34,37 @@
     <!-- Main Content -->
     <main class="container my-5">
         <section>
-            <h2>About Us</h2>
-            <p>Bine ați venit pe pagina About a proiectului nostru final DAW! Acest site a fost creat pentru a demonstra utilizarea tehnologiilor moderne de dezvoltare web.</p>
+            <h2>Adaugă o Poză cu Mașina Ta</h2>
+            <form id="postForm" class="mb-4">
+                <div class="mb-3">
+                    <label for="posterName" class="form-label">Nume:</label>
+                    <input type="text" id="posterName" class="form-control" placeholder="Introdu numele" required>
+                </div>
+                <div class="mb-3">
+                    <label for="posterEmail" class="form-label">Email (opțional):</label>
+                    <input type="email" id="posterEmail" class="form-control" placeholder="Introdu email-ul">
+                </div>
+                <div class="mb-3">
+                    <label for="carImage" class="form-label">Poză:</label>
+                    <input type="file" id="carImage" class="form-control" accept="image/*" required>
+                </div>
+                <button type="button" id="postImageButton" class="btn btn-success">Postează</button>
+            </form>
         </section>
 
         <section>
-            <h3>Obiectivele Proiectului:</h3>
-            <ul>
-                <li>Crearea unui site responsiv și atrăgător vizual</li>
-                <li>Implementarea funcționalităților interactive</li>
-                <li>Utilizarea tehnologiilor HTML, CSS, JavaScript și Bootstrap</li>
-            </ul>
-        </section>
-
-        <section>
-            <h3>Echipa Noastră:</h3>
-            <p>Acest proiect a fost realizat de o echipă dedicată de dezvoltatori pasionați de tehnologie și inovare.</p>
+            <h3>Postări</h3>
+            <div id="posts" class="row"></div>
         </section>
     </main>
 
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-3">
-        <p>&copy; 2025 Proiect Final DAW. Toate drepturile rezervate.</p>
+        <p>&copy; 2025 Blog Poze Mașini. Toate drepturile rezervate.</p>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="upload.js"></script>
 </body>
 </html>
