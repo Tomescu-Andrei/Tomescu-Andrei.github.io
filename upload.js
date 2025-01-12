@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load saved posts from localStorage
     function loadPosts() {
+        postsContainer.innerHTML = '';
+        galleryContainer.innerHTML = '';
+
         const savedPosts = JSON.parse(localStorage.getItem(localStorageKey)) || [];
         savedPosts.forEach(post => {
             displayPost(post.name, post.email, post.image, false);
@@ -32,8 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h5 class="card-title">${name}</h5>
                     ${email ? `<p class="card-text">${email}</p>` : ''}
                     ${!isApproved ? `
-                        <button class="btn btn-success btn-sm approve-button">✔</button>
-                        <button class="btn btn-danger btn-sm delete-button">✖</button>
+                        <button class="btn btn-success btn-sm approve-button">✔ Aproba</button>
+                        <button class="btn btn-danger btn-sm delete-button">✖ Șterge</button>
                     ` : ''}
                 </div>
             </div>
@@ -46,11 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             approveButton.addEventListener('click', () => {
                 approvePost(name, email, image);
+                notifyChange();
                 postElement.remove();
             });
 
             deleteButton.addEventListener('click', () => {
                 rejectPost(name, email, image);
+                notifyChange();
                 postElement.remove();
             });
         }
@@ -61,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedPosts = JSON.parse(localStorage.getItem(localStorageKey)) || [];
         savedPosts.push({ name, email, image });
         localStorage.setItem(localStorageKey, JSON.stringify(savedPosts));
+        notifyChange();
     }
 
     // Approve post
@@ -70,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(galleryStorageKey, JSON.stringify(approvedPosts));
 
         removePostFromLocalStorage(name, email, image, localStorageKey);
-        displayPost(name, email, image, true);
     }
 
     // Reject post
@@ -85,6 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
             post => post.name !== name || post.email !== email || post.image !== image
         );
         localStorage.setItem(storageKey, JSON.stringify(updatedPosts));
+    }
+
+    // Notify other tabs about changes
+    function notifyChange() {
+        const timestamp = Date.now(); // Utilizează un timestamp unic
+        localStorage.setItem('blogSync', timestamp.toString());
     }
 
     // Handle post submission
@@ -127,31 +138,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return re.test(email);
     }
 
-    // Immediate email validation on blur
-    const posterEmail = document.getElementById('posterEmail');
-    posterEmail.addEventListener('blur', () => {
-        const email = posterEmail.value.trim();
-        const errorMessage = document.getElementById('emailErrorMessage');
-
-        if (!email || validateEmail(email)) {
-            if (errorMessage) {
-                errorMessage.textContent = '';
-            }
-        } else {
-            if (!errorMessage) {
-                const errorDiv = document.createElement('div');
-                errorDiv.id = 'emailErrorMessage';
-                errorDiv.className = 'text-danger mt-1';
-                errorDiv.textContent = 'Adresa de email nu este validă.';
-                posterEmail.parentNode.appendChild(errorDiv);
-            } else {
-                errorMessage.textContent = 'Adresa de email nu este validă.';
-            }
+    // Listen for storage events
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'blogSync') {
+            loadPosts(); // Reîncarcă postările când există modificări
         }
     });
 
     // Load posts on page load
     loadPosts();
-
-    
 });
