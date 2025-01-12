@@ -152,4 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load posts on page load
     loadPosts();
+
+    
 });
