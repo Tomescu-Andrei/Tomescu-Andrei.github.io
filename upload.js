@@ -94,8 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Notify other tabs about changes
     function notifyChange() {
-        localStorage.setItem('blogSync', Date.now().toString());
+        const syncData = {
+            posts: JSON.parse(localStorage.getItem(localStorageKey)) || [],
+            gallery: JSON.parse(localStorage.getItem(galleryStorageKey)) || []
+        };
+        localStorage.setItem('syncData', JSON.stringify(syncData));
     }
+
+    // Listen for storage events
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'syncData') {
+            loadPosts(); // Reîncarcă postările și galeria
+        }
+    });
 
     // Handle post submission
     postImageButton.addEventListener('click', () => {
@@ -157,13 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 errorMessage.textContent = 'Adresa de email nu este validă.';
             }
-        }
-    });
-
-    // Listen for storage events
-    window.addEventListener('storage', (event) => {
-        if (event.key === 'blogSync') {
-            loadPosts(); // Reîncarcă postările când există modificări
         }
     });
 
