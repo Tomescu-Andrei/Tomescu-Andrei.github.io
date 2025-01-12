@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load saved posts from localStorage
     function loadPosts() {
+        postsContainer.innerHTML = '';
+        galleryContainer.innerHTML = '';
+
         const savedPosts = JSON.parse(localStorage.getItem(localStorageKey)) || [];
         savedPosts.forEach(post => {
             displayPost(post.name, post.email, post.image, false);
@@ -47,11 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
             approveButton.addEventListener('click', () => {
                 approvePost(name, email, image);
                 postElement.remove();
+                notifyChange();
             });
 
             deleteButton.addEventListener('click', () => {
                 rejectPost(name, email, image);
                 postElement.remove();
+                notifyChange();
             });
         }
     }
@@ -61,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedPosts = JSON.parse(localStorage.getItem(localStorageKey)) || [];
         savedPosts.push({ name, email, image });
         localStorage.setItem(localStorageKey, JSON.stringify(savedPosts));
+        notifyChange();
     }
 
     // Approve post
@@ -70,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(galleryStorageKey, JSON.stringify(approvedPosts));
 
         removePostFromLocalStorage(name, email, image, localStorageKey);
-        displayPost(name, email, image, true);
     }
 
     // Reject post
@@ -85,6 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
             post => post.name !== name || post.email !== email || post.image !== image
         );
         localStorage.setItem(storageKey, JSON.stringify(updatedPosts));
+    }
+
+    // Notify other tabs about changes
+    function notifyChange() {
+        localStorage.setItem('blogSync', Date.now().toString());
     }
 
     // Handle post submission
@@ -150,8 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Listen for storage events
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'blogSync') {
+            loadPosts(); // Reîncarcă postările când există modificări
+        }
+    });
+
     // Load posts on page load
     loadPosts();
-
-    
 });
